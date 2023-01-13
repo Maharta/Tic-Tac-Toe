@@ -3,6 +3,7 @@
 :root {
   --background-color: #181a1b;
   --block-hover-color: hsl(200, 6%, 20%);
+  --header-height: 100px;
 }
 
 body {
@@ -11,12 +12,15 @@ body {
 }
 
 header {
-  height: 100px;
+  height: var(--header-height);
   display: grid;
   place-content: center;
+  font-size: 1.5rem;
 }
 
 main {
+  padding-top: 1rem;
+  height: calc(100% - var(--header-height));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -55,4 +59,17 @@ main {
 
 p.turn {
   font-size: 2rem;
+}
+
+p.winner {
+  display: none;
+  font-size: 2.5rem;
+}
+
+p.winner.display {
+  display: block;
+}
+
+p.turn.hidden {
+  display: none;
 }
