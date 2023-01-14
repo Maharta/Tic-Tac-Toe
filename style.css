@@ -62,8 +62,8 @@ main {
   border-radius: 12px;
 }
 
-.menu-page button:hover,
-.menu-page button:focus {
+.menu-page button:hover:not(:disabled),
+.menu-page button:focus:not(:disabled) {
   animation: scale-up-and-down 1s ease-in-out infinite alternate;
   cursor: pointer;
 }
