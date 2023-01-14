@@ -15,6 +15,19 @@ const displayController = (() => {
     }, 750);
   }
 
+  function startAIEasy() {
+    const difficultyPage = document.querySelector('.difficulty.menu-page');
+    difficultyPage.classList.remove('fade-in');
+    difficultyPage.classList.add('fade-out');
+    setTimeout(() => {
+      const mainPage = document.querySelector('.main-page');
+      const board = document.querySelector('.board');
+      mainPage.classList.remove('invisible');
+      mainPage.classList.add('fade-in');
+      board.classList.remove('invisible');
+    }, 750);
+  }
+
   function add(element, to) {
     to.appendChild(element);
   }
@@ -38,7 +51,8 @@ const displayController = (() => {
 
   function declareWinner(winner) {
     const winnerEl = document.querySelector('p.winner');
-    winnerEl.classList.add('display');
+    winnerEl.classList.remove('invisible');
+    winnerEl.classList.add('visible');
     playerTurnText.classList.add('hidden');
     if (winner === 1) {
       winnerEl.innerHTML = '<strong>Player 1 Wins!</strong>';
@@ -49,14 +63,26 @@ const displayController = (() => {
     }
   }
 
-  return { add, addToBoard, toggleTurn, declareWinner, showAIOptions };
+  return {
+    add,
+    addToBoard,
+    toggleTurn,
+    declareWinner,
+    showAIOptions,
+    startAIEasy,
+  };
 })();
 
 const gameBoard = ((viewController) => {
   const state = {
     board: [[], [], []],
     isFinished: false,
+    vsAI: false,
   };
+
+  function startAIEasy() {
+    state.vsAI = 'easy';
+  }
 
   function checkWinner() {
     let line;
@@ -171,3 +197,6 @@ blocks.forEach((block) => {
 
 const playVSAIButton = document.querySelector('button[data-id="ai-button"]');
 playVSAIButton.addEventListener('click', displayController.showAIOptions);
+
+const easyButton = document.querySelector('button[data-id="easy-button"]');
+easyButton.addEventListener('click', displayController.startAIEasy);
