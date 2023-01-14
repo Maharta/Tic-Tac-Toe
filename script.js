@@ -2,6 +2,19 @@ let currentTurn = 1;
 
 const displayController = (() => {
   const playerTurnText = document.querySelector('.turn');
+
+  function showAIOptions() {
+    /* transition page into choose difficulty page */
+    const menuPage = document.querySelector('.menu-page');
+    menuPage.classList.add('fade-out');
+
+    const difficultyPage = document.querySelector('.difficulty.menu-page');
+    setTimeout(() => {
+      difficultyPage.classList.remove('invisible');
+      difficultyPage.classList.add('fade-in');
+    }, 750);
+  }
+
   function add(element, to) {
     to.appendChild(element);
   }
@@ -36,7 +49,7 @@ const displayController = (() => {
     }
   }
 
-  return { add, addToBoard, toggleTurn, declareWinner };
+  return { add, addToBoard, toggleTurn, declareWinner, showAIOptions };
 })();
 
 const gameBoard = ((viewController) => {
@@ -155,3 +168,6 @@ blocks.forEach((block) => {
     displayController.toggleTurn();
   });
 });
+
+const playVSAIButton = document.querySelector('button[data-id="ai-button"]');
+playVSAIButton.addEventListener('click', displayController.showAIOptions);
