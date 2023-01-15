@@ -12,12 +12,12 @@ const displayController = (() => {
     hideMenuPage();
     const difficultyPage = document.querySelector('.difficulty.menu-page');
     setTimeout(() => {
-      difficultyPage.classList.remove('invisible');
+      difficultyPage.classList.remove('invisible'); // using setTimeout to work well with css animations.
       difficultyPage.classList.add('fade-in');
     }, fadeOutDuration);
   }
 
-  function startAIEasy() {
+  function startVSAI() {
     const difficultyPage = document.querySelector('.difficulty.menu-page');
     difficultyPage.classList.remove('fade-in');
     difficultyPage.classList.add('fade-out');
@@ -70,7 +70,7 @@ const displayController = (() => {
     toggleTurnText,
     declareWinner,
     showAIOptions,
-    startAIEasy,
+    startVSAI,
     showBoardPage,
   };
 })();
@@ -90,9 +90,14 @@ const gameBoard = ((viewController) => {
     currentTurn: playerOne,
   };
 
-  function startAIEasy() {
+  function startEasyAI() {
     state.vsAI = 'easy';
     playerTwo = AIFactory('easy');
+  }
+
+  function startImpossibleAI() {
+    state.vsAI = 'impossible';
+    playerTwo = AIFactory('impossible');
   }
 
   function play(row, col) {
@@ -111,6 +116,14 @@ const gameBoard = ((viewController) => {
     state.board[row][col] = mark;
     viewController.addToBoard(row, col, mark);
     checkWinner();
+  }
+
+  function addToState(row, col, mark) {
+    state.board[row][col] = mark;
+  }
+
+  function removeFromState(row, col) {
+    state.board[row][col] = row.toString() + col.toString();
   }
 
   function getPossibleMoves() {
@@ -191,7 +204,7 @@ const gameBoard = ((viewController) => {
         i === 8
         /* i === 8 so the algorithm check for every single case before saying it's a draw on the last turn. */
       ) {
-        viewController.declareWinner(-1);
+        viewController.declareWinner('draw');
         state.isFinished = true;
         return;
       }
@@ -199,7 +212,6 @@ const gameBoard = ((viewController) => {
   }
 
   return {
-    add,
     /* getter to prevent direct manipulation (read only properties) */
     get isFinished() {
       return state.isFinished;
@@ -216,8 +228,15 @@ const gameBoard = ((viewController) => {
     get playerTwo() {
       return playerTwo;
     },
+    get board() {
+      return state.board;
+    },
+    add,
+    removeFromState,
+    addToState,
     getPossibleMoves,
-    startAIEasy,
+    startEasyAI,
+    startImpossibleAI,
     play,
   };
 })(displayController); /* external dependencies is better injected */
@@ -238,14 +257,138 @@ function playerFactory(name, mark) {
 function AIFactory(difficulty) {
   const { name, mark } = playerFactory('Mr.Destructoid', 'O');
 
+  function doBestMove() {
+    const bestMove = {
+      val: -999,
+      row: -1,
+      col: -1,
+    };
+    const possibleMoves = gameBoard.getPossibleMoves();
+    possibleMoves.forEach((possibleMove) => {
+      const [row, col] = possibleMove.split('').map(Number);
+      gameBoard.addToState(row, col, mark);
+      const val = minimax(0, false);
+      if (val > bestMove.val) {
+        bestMove.val = val;
+        bestMove.row = row;
+        bestMove.col = col;
+      }
+      gameBoard.removeFromState(row, col);
+    });
+    gameBoard.add(bestMove.row, bestMove.col, mark);
+  }
+
+  function evaluate(board) {
+    let line;
+    for (let i = 1; i < 9; i += 1) {
+      switch (i) {
+        /* 8 ways to win */
+        case 1: {
+          line = board[0][0] + board[0][1] + board[0][2];
+          break;
+        }
+        case 2: {
+          line = board[1][0] + board[1][1] + board[1][2];
+          break;
+        }
+        case 3: {
+          line = board[2][0] + board[2][1] + board[2][2];
+          break;
+        }
+        case 4: {
+          line = board[0][0] + board[1][0] + board[2][0];
+          break;
+        }
+        case 5: {
+          line = board[0][1] + board[1][1] + board[2][1];
+          break;
+        }
+        case 6: {
+          line = board[0][2] + board[1][2] + board[2][2];
+          break;
+        }
+        case 7: {
+          line = board[0][0] + board[1][1] + board[2][2];
+          break;
+        }
+        case 8: {
+          line = board[0][2] + board[1][1] + board[2][0];
+          break;
+        }
+        default: {
+          line = '';
+          break;
+        }
+      }
+
+      if (line === 'XXX') {
+        return -10;
+      }
+      if (line === 'OOO') {
+        return +10;
+      }
+    }
+    return 0;
+  }
+
+  function minimax(depth, isMaximizingPlayer) {
+    /* depth used for optimizing AI move, AI will try to win ASAP or Prolong the game if isn't possible to win */
+    /* 
+      Maximizing player should be true when it is the AI Turn (O Mark)
+       First value of the isMaximizingPlayer will be false, since the first time it called is on the human or 'X' turn 
+    */
+    const score = evaluate(gameBoard.board);
+    if (score === 10) {
+      return score - depth;
+    }
+
+    if (score === -10) {
+      return score + depth;
+    }
+
+    if (gameBoard.getPossibleMoves().length === 0) {
+      return score; // score would be 0 here when it's draw.
+    }
+
+    const possibleMoves = gameBoard.getPossibleMoves();
+    if (isMaximizingPlayer) {
+      let max = -999;
+      possibleMoves.forEach((possibleMove) => {
+        const [row, col] = possibleMove.split('').map(Number);
+        gameBoard.addToState(row, col, mark);
+        max = Math.max(max, minimax(depth + 1, !isMaximizingPlayer));
+        gameBoard.removeFromState(row, col);
+      });
+      return max;
+    }
+
+    // if minimizing player
+    let min = 999;
+    possibleMoves.forEach((possibleMove) => {
+      const [row, col] = possibleMove.split('').map(Number);
+      gameBoard.addToState(row, col, 'X');
+      min = Math.min(min, minimax(depth + 1, !isMaximizingPlayer));
+      gameBoard.removeFromState(row, col);
+    });
+    return min;
+  }
+
+  function doRandomMove() {
+    const possibleMoves = gameBoard.getPossibleMoves();
+    const randomMoveToTake = possibleMoves[
+      Math.floor(Math.random() * possibleMoves.length)
+    ]
+      .split('')
+      .map(Number);
+    gameBoard.add(randomMoveToTake[0], randomMoveToTake[1], mark);
+  }
+
   function play() {
     if (difficulty === 'easy') {
-      const possibleMoves = gameBoard.getPossibleMoves();
-      const randomMoveToTake =
-        possibleMoves[Math.floor(Math.random() * possibleMoves.length)].split(
-          ''
-        );
-      gameBoard.add(+randomMoveToTake[0], +randomMoveToTake[1], mark);
+      doRandomMove();
+    } else {
+      /* impossible to beat AI with minimax algorithm */
+      doBestMove();
     }
   }
 
@@ -291,6 +434,14 @@ playerVSPlayerButton.addEventListener('click', () => {
 
 const easyButton = document.querySelector('button[data-id="easy-button"]');
 easyButton.addEventListener('click', () => {
-  gameBoard.startAIEasy();
-  displayController.startAIEasy();
+  gameBoard.startEasyAI();
+  displayController.startVSAI();
+});
+
+const impossibleButton = document.querySelector(
+  'button[data-id="impossible-button"]'
+);
+impossibleButton.addEventListener('click', () => {
+  gameBoard.startImpossibleAI();
+  displayController.startVSAI();
 });
