@@ -106,7 +106,7 @@ const gameBoard = ((viewController) => {
       viewController.toggleTurnText(playerTwo);
       state.currentTurn = playerTwo;
     } else {
-      playerTwo.play(row, col);
+      playerTwo.play(row, col); // row and col could be undefined if playerTwo is an AI.
       viewController.toggleTurnText(playerOne);
       state.currentTurn = playerOne;
     }
@@ -410,7 +410,7 @@ blocks.forEach((block) => {
     gameBoard.play(row, col);
     if (gameBoard.vsAI && !gameBoard.isFinished) {
       setTimeout(() => {
-        gameBoard.play(row, col);
+        gameBoard.play(); // AI play function doesn't need row and col arguments.
       }, 500);
     }
   });
