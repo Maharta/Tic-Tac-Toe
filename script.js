@@ -76,8 +76,8 @@ const displayController = (() => {
 })();
 
 const gameBoard = ((viewController) => {
-  const playerOne = playerFactory('Maharta', 'X');
-  let playerTwo = playerFactory('Richa', 'O');
+  const playerOne = playerFactory('Player 1', 'X');
+  let playerTwo = playerFactory('Player 2', 'O'); // use let because playerTwo could change to AI
 
   const state = {
     board: [
