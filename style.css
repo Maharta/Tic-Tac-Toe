@@ -13,6 +13,7 @@
   --background-color: #181a1b;
   --block-hover-color: hsl(200, 6%, 20%);
   --header-height: 100px;
+  --button-border-color: #76767600;
 }
 
 body {
@@ -75,8 +76,9 @@ main {
   color: white;
   padding: 1rem;
   font-size: 4rem;
+  font-weight: 400;
   border-radius: 12px;
-  font-weight: 300;
+  border: 1px solid white;
 }
 
 .menu-page button:hover:not(:disabled),
@@ -139,12 +141,10 @@ main {
   background-color: var(--block-hover-color);
 }
 
-p.turn {
-  font-size: 3rem;
-}
-
+p.turn,
 p.winner {
-  font-size: 2.5rem;
+  text-align: center;
+  font-size: 3rem;
 }
 
 /* main page (board page) */

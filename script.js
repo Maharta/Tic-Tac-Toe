@@ -47,7 +47,7 @@ const displayController = (() => {
   }
 
   function toggleTurnText(currentPlayer) {
-    playerTurnText.innerHTML = `<strong>${currentPlayer.name}</strong> Turn`;
+    playerTurnText.innerHTML = `${currentPlayer.name} Turn`;
   }
 
   function declareWinner(winner, winnerName) {
@@ -56,11 +56,11 @@ const displayController = (() => {
     winnerEl.classList.add('visible');
     playerTurnText.classList.add('hidden');
     if (winner === 'human') {
-      winnerEl.innerHTML = `<strong>${winnerName} wins!</strong>`;
+      winnerEl.innerHTML = `${winnerName} wins!`;
     } else if (winner === 'AI') {
-      winnerEl.innerHTML = `<strong>Robots has taken over the world...</strong>`;
+      winnerEl.innerHTML = `Robots has taken over the world...`;
     } else {
-      winnerEl.innerHTML = `<strong>Draw</strong>`;
+      winnerEl.innerHTML = `Draw`;
     }
   }
 
